@@ -1,0 +1,16 @@
+{
+  "name": "vouks-apis",
+  "version": "1.0.0",
+  "description": "Vouks APIs",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "firebase": "^9.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.0"
+  }
+}
