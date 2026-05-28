@@ -40,6 +40,7 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: 'No data provided.' });
   }
 
+  console.log(payload)
     return res.status(201).json(payload);
 
   try {
