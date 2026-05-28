@@ -41,10 +41,9 @@ module.exports = async (req, res) => {
   }
 
   console.log(payload)
-    return res.status(201).json(payload);
 
   try {
-    const doc = await addDoc(collection(db, 'gatewayData'), {
+    const doc = await addDoc(collection(db, 'werewolvePayment'), {
       payload,
       receivedAt: serverTimestamp(),
     });
