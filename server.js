@@ -55,21 +55,60 @@ module.exports = async (req, res) => {
   if (payload.verify) {
     try {
       const phone = payload.phone;
+      if (!phone)
+        return res.status(400).json({
+          success: false,
+          error: 'Phone number is required.'
+        });
 
+      const q = query( collection(db, 'werewolvePayment'),  where('payload.wasClaimed', '==', false));
+      const snapshot = await getDocs(q);
+
+      if (snapshot.empty) {
+        return res.status(404).json({ success: false, exists: false,  error: 'No unclaimed payment found.' });
+      }
+
+      // Find first document whose phone contains the provided phone
+      const docSnap = snapshot.docs.find(doc => {
+        const docPhone = doc.data()?.payload?.customer?.phone.toString() || '';
+        return ( docPhone.includes(phone));
+      });
+
+      if (!docSnap) {
+        return res.status(404).json({
+          success: false,
+          exists: false,
+          error: 'No matching phone number found.'
+        });
+      }
+      return res.status(200).json({
+        success: true,
+        exists: true,
+        id: docSnap.id,
+        data: docSnap.data()
+      });
+
+    } catch (error) {
+      console.error('Verification error:', error);
+      return res.status(500).json({
+        success: false,
+        error: 'Unable to verify payment.'
+      });
+    }
+  } else if (payload.claim) {
+    try {
+      const phone = payload.phone;
       if (!phone) {
         return res.status(400).json({
           success: false,
           error: 'Phone number is required.'
         });
       }
-
       const q = query(
         collection(db, 'werewolvePayment'),
         where('payload.wasClaimed', '==', false)
       );
-
       const snapshot = await getDocs(q);
-
       if (snapshot.empty) {
         return res.status(404).json({
           success: false,
@@ -81,10 +120,7 @@ module.exports = async (req, res) => {
       // Find first document whose phone contains the provided phone
       const docSnap = snapshot.docs.find(doc => {
         const docPhone = doc.data()?.payload?.customer?.phone.toString() || '';
-
-        return (
-          docPhone.includes(phone)
-        );
+        return ( docPhone.includes(phone));
       });
 
       if (!docSnap) {
@@ -99,13 +135,13 @@ module.exports = async (req, res) => {
         'payload.wasClaimed': true
       });
 
-      /* const updatedData = {
+      const updatedData = {
          ...docSnap.data(),
          payload: {
            ...docSnap.data().payload,
            wasClaimed: true
          }
-       };*/
+       };
 
       return res.status(200).json({
         success: true,
