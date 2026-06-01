@@ -7,6 +7,7 @@ const {
   query,
   where,
   getDocs,
+  updateDoc,
   limit
 } = require('firebase/firestore');
 
