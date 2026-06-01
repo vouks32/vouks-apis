@@ -99,13 +99,13 @@ module.exports = async (req, res) => {
         'payload.wasClaimed': true
       });
 
-      const updatedData = {
+     /* const updatedData = {
         ...docSnap.data(),
         payload: {
           ...docSnap.data().payload,
           wasClaimed: true
         }
-      };
+      };*/
 
       return res.status(200).json({
         success: true,
