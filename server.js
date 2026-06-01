@@ -1,7 +1,14 @@
-
-
 const { initializeApp } = require('firebase/app');
-const { getFirestore, collection, addDoc, serverTimestamp } = require('firebase/firestore');
+const {
+  getFirestore,
+  collection,
+  addDoc,
+  serverTimestamp,
+  query,
+  where,
+  getDocs,
+  limit
+} = require('firebase/firestore');
 
 const firebaseConfig = {
   apiKey: "AIzaSyCfLOfbS5bIvqu4hVIfb99Ok8aMagpoWn0",
@@ -34,13 +41,77 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: 'Method not allowed, use POST.' });
   }
 
-  const payload = req.body && Object.keys(req.body).length ? req.body : req.query;
+  const payload =
+    req.body && Object.keys(req.body).length
+      ? req.body
+      : req.query;
 
   if (!payload || Object.keys(payload).length === 0) {
     return res.status(400).json({ error: 'No data provided.' });
   }
 
-  console.log(payload)
+  console.log(payload);
+  
+  if (payload.verify) {
+    try {
+      const phone = payload.phone;
+
+      if (!phone) {
+        return res.status(400).json({
+          success: false,
+          error: 'Phone number is required.'
+        });
+      }
+
+      const q = query(
+        collection(db, 'werewolvePayment'),
+        where('payload.customer.phone', '==', phone),
+        where('payload.wasClaimed', '==', false),
+        limit(1)
+      );
+
+      const snapshot = await getDocs(q);
+
+      if (snapshot.empty) {
+        return res.status(404).json({
+          success: false,
+          exists: false,
+          error: 'No unclaimed payment found.'
+        });
+      }
+
+      const docSnap = snapshot.docs[0];
+
+      // Update the document before returning it
+      await updateDoc(docSnap.ref, {
+        'payload.wasClaimed': true
+      });
+
+      // Get updated data
+      const updatedData = {
+        ...docSnap.data(),
+        payload: {
+          ...docSnap.data().payload,
+          wasClaimed: true
+        }
+      };
+
+      return res.status(200).json({
+        success: true,
+        exists: true,
+        id: docSnap.id,
+        data: updatedData
+      });
+
+    } catch (error) {
+      console.error('Verification error:', error);
+
+      return res.status(500).json({
+        success: false,
+        error: 'Unable to verify payment.'
+      });
+    }
+  }
 
   try {
     const doc = await addDoc(collection(db, 'werewolvePayment'), {
@@ -48,9 +119,16 @@ module.exports = async (req, res) => {
       receivedAt: serverTimestamp(),
     });
 
-    return res.status(201).json({ success: true, id: doc.id });
+    return res.status(201).json({
+      success: true,
+      id: doc.id
+    });
+
   } catch (error) {
     console.error('Firestore save error:', error);
-    return res.status(500).json({ error: 'Unable to save data to Firestore.' });
+
+    return res.status(500).json({
+      error: 'Unable to save data to Firestore.'
+    });
   }
 };
