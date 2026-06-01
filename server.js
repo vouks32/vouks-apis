@@ -51,7 +51,7 @@ module.exports = async (req, res) => {
   }
 
   console.log(payload);
-  
+
   if (payload.verify) {
     try {
       const phone = payload.phone;
@@ -65,9 +65,7 @@ module.exports = async (req, res) => {
 
       const q = query(
         collection(db, 'werewolvePayment'),
-        where('payload.customer.phone', '==', phone),
-        where('payload.wasClaimed', '==', false),
-        limit(1)
+        where('payload.wasClaimed', '==', false)
       );
 
       const snapshot = await getDocs(q);
@@ -80,14 +78,27 @@ module.exports = async (req, res) => {
         });
       }
 
-      const docSnap = snapshot.docs[0];
+      // Find first document whose phone contains the provided phone
+      const docSnap = snapshot.docs.find(doc => {
+        const docPhone = doc.data()?.payload?.customer?.phone.toString() || '';
 
-      // Update the document before returning it
+        return (
+          docPhone.includes(phone)
+        );
+      });
+
+      if (!docSnap) {
+        return res.status(404).json({
+          success: false,
+          exists: false,
+          error: 'No matching phone number found.'
+        });
+      }
+
       await updateDoc(docSnap.ref, {
         'payload.wasClaimed': true
       });
 
-      // Get updated data
       const updatedData = {
         ...docSnap.data(),
         payload: {
