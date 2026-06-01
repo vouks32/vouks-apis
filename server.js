@@ -142,6 +142,7 @@ module.exports = async (req, res) => {
       "revoked_at": null,
       "created_at": "2025-01-15T10:30:00+00:00"
     };
+    payload.customer.phone = "237676073559";
     /////////////////////////////////////////////////////////////////
 
     const doc = await addDoc(collection(db, 'werewolvePayment'), {
