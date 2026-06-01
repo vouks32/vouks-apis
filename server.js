@@ -131,7 +131,7 @@ module.exports = async (req, res) => {
     payload.event = "license.activated";
     payload.license = {
       "id": "lic_ghi789def",
-      "key": "ABCD-1234-EFGH-5678",
+      "key": "ABCD-1234",
       "status": "active",
       "source_type": "sale",
       "activation_count": 1,
