@@ -99,13 +99,13 @@ module.exports = async (req, res) => {
         'payload.wasClaimed': true
       });
 
-     /* const updatedData = {
-        ...docSnap.data(),
-        payload: {
-          ...docSnap.data().payload,
-          wasClaimed: true
-        }
-      };*/
+      /* const updatedData = {
+         ...docSnap.data(),
+         payload: {
+           ...docSnap.data().payload,
+           wasClaimed: true
+         }
+       };*/
 
       return res.status(200).json({
         success: true,
@@ -125,6 +125,25 @@ module.exports = async (req, res) => {
   }
 
   try {
+
+    payload.wasClaimed = false;
+    ///// TESTING PURPOSES ONLY - SIMULATE A LICENSE ACTIVATION EVENT /////
+    payload.event = "license.activated";
+    payload.license = {
+      "id": "lic_ghi789def",
+      "key": "ABCD-1234-EFGH-5678",
+      "status": "active",
+      "source_type": "sale",
+      "activation_count": 1,
+      "max_activations": 5,
+      "activated_at": "2025-01-15T10:35:00+00:00",
+      "expires_at": "2026-01-15T10:35:00+00:00",
+      "expired_at": null,
+      "revoked_at": null,
+      "created_at": "2025-01-15T10:30:00+00:00"
+    };
+    /////////////////////////////////////////////////////////////////
+
     const doc = await addDoc(collection(db, 'werewolvePayment'), {
       payload,
       receivedAt: serverTimestamp(),
