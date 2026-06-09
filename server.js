@@ -165,7 +165,7 @@ module.exports = async (req, res) => {
 
     payload.wasClaimed = false;
     ///// TESTING PURPOSES ONLY - SIMULATE A LICENSE ACTIVATION EVENT /////
-    payload.event = "license.activated";
+    /*payload.event = "license.activated";
     payload.license = {
       "id": "lic_ghi789def",
       "key": "ABCD-1234",
@@ -178,8 +178,8 @@ module.exports = async (req, res) => {
       "expired_at": null,
       "revoked_at": null,
       "created_at": "2025-01-15T10:30:00+00:00"
-    };
-    payload.customer.phone = "237676073559";
+    };*/
+    
     /////////////////////////////////////////////////////////////////
 
     const doc = await addDoc(collection(db, 'werewolvePayment'), {
